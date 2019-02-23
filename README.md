@@ -25,3 +25,13 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 * Aferição de velocidade com um sensor optico
 * 
 
+
+
+# Acionamento dos motores
+
+Para acionar os motores foram levadas em conta os requisitos de projeto, que nesse quesito são:
+* Controle de direção do movimento
+* Controle de velocidade
+
+Com relação ao controle de direção foi escolhido o sistema de ponte H, 
+![Ponte H](https://ibb.co/R73ZV11)
