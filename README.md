@@ -53,6 +53,7 @@ Corrente maxima 1,5A
  
 ### Escolha
 Como nesse projeto vamos trabalhar com quatro motores, dois por canal, e sendo eles de tensão nominal de 3 - 6V e corrente nominal de 300mA todos os circuitos cumprem o requisito de potência mínima, O L6203 foi descartado por ser uma ponte H de potência, ficando superdimensionado e encarecendo o projeto, ficando a escolha entre o circuito discreto e o L2931B no quesito eficiência energética, afinal, se trata de um sistema embarcado, e por isso necessita de um cuidado maior com a eficiência
+Montado os dois circuitos de acinamento alimentados em 5V foi obtido uma tensão de 3,08V com o integrado e 4,8V no circuito discreto, uma diferença de 35% no consumo do circuito, sendo escolhido o circuito discreto.  
 
 ### Controle de velocidade
 O controle da velocidade vai ser feito por meio da tecnica de modulação PWM, via microcontrolador atuando sobre a ponte H, por este motivo a condição de teste do circuito a ser ultilizado sera a eficiencia do mesmo trabalhando em conjunto com um PWM 
