@@ -60,4 +60,8 @@ Circuito final de alimentação dos motores, com queda de 0,4V de tensão na car
 
 
 ### Controle de velocidade
-O controle da velocidade vai ser feito por meio da tecnica de modulação PWM, via microcontrolador atuando sobre a ponte H, por este motivo a condição de teste do circuito a ser ultilizado sera a eficiencia do mesmo trabalhando em conjunto com um PWM 
+O controle da velocidade vai ser feito por meio da tecnica de modulação PWM, via microcontrolador atuando sobre a ponte H.
+Como o circuito de ponte H escolhido não pode em hipotese alguma ter o os dois transistores de atuação polarizados ao mesmo tempo, optou-se por ultilizar o PWM no modo normal e no modo inverso, de forma a construir um sistama redundante nesse sendido, se houver uma falha no software mesmo assim não havera um problema critico na ponte H.
+
+![PWM](https://i.ibb.co/jfv3VWc/TEK0000.png)
+
