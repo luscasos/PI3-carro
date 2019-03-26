@@ -22,6 +22,10 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 ## Cronograma
 * Acionamento dos motores (completa em 22/03)
 * Controle de tensão nos motores via PWM
+* Medição dos dados do acelerometro no APP
+* Envio dos dados de direção e sentido via bluetooth
+* Recebimento dos dados de direção e sentido no ucontrolador
+* Definição da relação entre dados do acelerometro e diferença na relação de PWM
 * Aferição de velocidade com um sensor optico
 * colocação das baterias
 * 
