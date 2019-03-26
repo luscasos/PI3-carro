@@ -65,3 +65,5 @@ Como o circuito de ponte H escolhido não pode em hipotese alguma ter o os dois 
 
 ![PWM](https://i.ibb.co/jfv3VWc/TEK0000.png)
 
+# Controle de Direção e sentido
+Tanto o controle de direção quanto o de sentido serão feitas via aplicação em Android e transmitidas por bluetooth para o microcontrolador embarcado no carro, o controle de sentido sera feito via dois botões, um para ré e outro para frente, não precinado nenhum o carro fica parado, com a possibilidade de fixar uma velocidade constante. A direção sera feita via medição dos acelerometros do celular, que fara o celular nesse caso atuar como um volante.
