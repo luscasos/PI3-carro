@@ -1,11 +1,18 @@
 package com.example.lucas.pi3;
 
-        import android.annotation.SuppressLint;
+
         import android.app.Activity;
         import android.bluetooth.BluetoothAdapter;
         import android.bluetooth.BluetoothDevice;
         import android.bluetooth.BluetoothSocket;
+        import android.content.Context;
         import android.content.Intent;
+        import android.content.pm.ActivityInfo;
+        import android.hardware.Sensor;
+        import android.hardware.SensorEvent;
+        import android.hardware.SensorEventListener;
+        import android.hardware.SensorManager;
+        import android.media.MediaPlayer;
         import android.os.Handler;
         import android.os.Message;
         import android.support.v7.app.AppCompatActivity;
@@ -17,16 +24,35 @@ package com.example.lucas.pi3;
         import android.view.MotionEvent;
         import android.view.View;
         import android.widget.Button;
+        import android.widget.TextView;
         import android.widget.Toast;
+
         import java.io.IOException;
         import java.io.InputStream;
         import java.io.OutputStream;
         import java.util.Objects;
         import java.util.UUID;
 
-        import static android.view.MotionEvent.ACTION_BUTTON_PRESS;
 
-public class MainActivity extends AppCompatActivity {
+/**
+ * Created by:
+ *
+ * Alejandro Alcalde (elbauldelprogramador.com)
+ * Cristina Heredia
+ *
+ * on 2/9/16.
+ *
+ * This file is part of MovementSound
+ */
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    /**
+     * Constants for sensors
+     */
+    private static final float SHAKE_THRESHOLD = 1.1f;
+    private static final int SHAKE_WAIT_TIME_MS = 250;
+    private static final float ROTATION_THRESHOLD = 2.0f;
+    private static final int ROTATION_WAIT_TIME_MS = 100;
 
     private static final int conectionRequest = 2;
     private static final int MESSAGE_READ = 3;
@@ -42,20 +68,55 @@ public class MainActivity extends AppCompatActivity {
 
     ConnectedThread connectedThread;
 
-    Button frente;
-    Button re;
+    //Button frente;
+    //Button re;
     boolean conectado=false;
 
-    @SuppressLint("ClickableViewAccessibility")
+    /**
+     * The sounds to play when a pattern is detected
+     */
+
+    /**
+     * Sensors
+     */
+    private SensorManager mSensorManager;
+    private Sensor mSensorAcc;
+    private Sensor mSensorGyr;
+    private long mShakeTime = 0;
+    private long mRotationTime = 0;
+
+    /**
+     * UI
+     */
+    private TextView mGyrox;
+    private TextView mGyroy;
+    private TextView mGyroz;
+    private TextView mAccx;
+    private TextView mAccy;
+    private TextView mAccz;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Inicialização do bluetooth e botões
+        // Get the sensors to use
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensorAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        // Instanciate the sound to use
+
+       // mGyrox = (TextView) findViewById(R.id.gyro_x);
+       // mGyroy = (TextView) findViewById(R.id.gyro_y);
+       // mGyroz = (TextView) findViewById(R.id.gyro_z);
+        mAccx = (TextView) findViewById(R.id.accele_x);
+        mAccy = (TextView) findViewById(R.id.accele_y);
+        mAccz = (TextView) findViewById(R.id.accele_z);
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        frente = findViewById(R.id.frente);
-        re = findViewById(R.id.re);
+        //frente = findViewById(R.id.frente);
+        //re = findViewById(R.id.re);
 
         // Verifica se há suporte a bluetooth
         if (mBluetoothAdapter == null) {
@@ -92,29 +153,141 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Envia uma string via bluetooth por meio de click em botão
-        re.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Toast.makeText(getApplicationContext(), "solta",   Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
-
-        frente.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Toast.makeText(getApplicationContext(), "solta",   Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
+//        re.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                Toast.makeText(getApplicationContext(), "solta",   Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        });
+//
+//        frente.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                Toast.makeText(getApplicationContext(), "solta",   Toast.LENGTH_SHORT).show();
+//                return false;
+//            }
+//        });
 
 
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, mSensorAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorGyr, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                mAccx.setText(R.string.act_main_no_acuracy);
+                mAccy.setText(R.string.act_main_no_acuracy);
+                mAccz.setText(R.string.act_main_no_acuracy);
+//            } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+//                mGyrox.setText(R.string.act_main_no_acuracy);
+//                mGyroy.setText(R.string.act_main_no_acuracy);
+//                mGyroz.setText(R.string.act_main_no_acuracy);
+            }
+            return;
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mAccx.setText("x = " + Float.toString(event.values[0]));
+            mAccy.setText("y = " + Float.toString(event.values[1]));
+            mAccz.setText("z = " + Float.toString(event.values[2]));
+            if(conectado){
+                char dados[]={(char)(event.values[1]*10)};//,(byte)(event.values[1]*10+127),(byte)(event.values[2]*10+127)};
+                String x = new String(dados);
+               // connectedThread.write(";");
+               
+                connectedThread.write(Float.toString((event.values[1]*10+300)).substring(0,3)+Float.toString((event.values[2]*10+300)).substring(0,3)+'\n');
+                //byte x = (byte)(event.values[1]*10+127);
+              //  connectedThread.write("Juca");
+                Log.d("dado yz","Y : "+Float.toString((event.values[1]*10+300)).substring(0,3)+" Z : "+Float.toString((event.values[2]*10+300)).substring(0,3));
+//                Log.d("byte y",Byte.toString(dados[1]));
+  //              Log.d("byte z",Byte.toString(dados[2]));
+            }
+
+            detectShake(event);
+//        } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+//            mGyrox.setText("x = " + Float.toString(event.values[0]));
+//            mGyroy.setText("y = " + Float.toString(event.values[1]));
+//            mGyroz.setText("z = " + Float.toString(event.values[2]));
+//            detectRotation(event);
+        }
 
 
-    // iniciando ActionBar
+
+    }
+
+    // References:
+    //  - http://jasonmcreynolds.com/?p=388
+    //  - http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
+
+    /**
+     * Detect a shake based on the ACCELEROMETER sensor
+     *
+     * @param event
+     */
+    private void detectShake(SensorEvent event) {
+        long now = System.currentTimeMillis();
+
+        if ((now - mShakeTime) > SHAKE_WAIT_TIME_MS) {
+            mShakeTime = now;
+
+            float gX = event.values[0] / SensorManager.GRAVITY_EARTH;
+            float gY = event.values[1] / SensorManager.GRAVITY_EARTH;
+            float gZ = event.values[2] / SensorManager.GRAVITY_EARTH;
+
+            // gForce will be close to 1 when there is no movement
+            double gForce = Math.sqrt(gX * gX + gY * gY + gZ * gZ);
+
+            // Change background color if gForce exceeds threshold;
+            // otherwise, reset the color
+            if (gForce > SHAKE_THRESHOLD) {
+            }
+        }
+    }
+
+    /**
+     * Detect a rotation in on the GYROSCOPE sensor
+     *
+     * @param event
+     */
+    private void detectRotation(SensorEvent event) {
+        long now = System.currentTimeMillis();
+
+        if ((now - mRotationTime) > ROTATION_WAIT_TIME_MS) {
+            mRotationTime = now;
+
+            // Change background color if rate of rotation around any
+            // axis and in any direction exceeds threshold;
+            // otherwise, reset the color
+            if (Math.abs(event.values[0]) > ROTATION_THRESHOLD ||
+                    Math.abs(event.values[1]) > ROTATION_THRESHOLD ||
+                    Math.abs(event.values[2]) > ROTATION_THRESHOLD) {
+
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -202,23 +375,41 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void run() {
-            byte[] buffer = new byte[1024];  // buffer store for the stream
+            byte[] buffer;  // buffer store for the stream
+            buffer = new byte[1024];
             int bytes; // bytes returned from read()
 
+            try {
+                mmInStream.reset();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             // Keep listening to the InputStream until an exception occurs
-            while (true) {
+            while (conectado) {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
-
+                    Log.d("recebido",Integer.toString(bytes));
                     String dadosBt = new String(buffer,0,bytes);
                     // Send the obtained bytes to the UI activity
                     mHandler.obtainMessage(MESSAGE_READ, bytes, -1, dadosBt).sendToTarget();
 
                 } catch (IOException e) {
-                    break;
+
+                    //showNotification();
+                    try {
+                        meuSocket.connect();
+//                        mNotificationManager.cancelAll();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+
+                    }
                 }
             }
+
+//            mNotificationManager.cancelAll();
+            //stopForeground(true);
+            Log.d("Finalizando thread src",""+true);
         }
 
         // connectedThread.write(string);   Para enviar dados
@@ -228,9 +419,13 @@ public class MainActivity extends AppCompatActivity {
             byte[] msgBuffer = dadosEnviar.getBytes();
             try {
                 mmOutStream.write(msgBuffer);
-            } catch (IOException ignored) { }
-        }
+                sleep(10);
+            } catch (IOException ignored) { } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
+
+        }
     }
 
 
