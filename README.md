@@ -22,6 +22,10 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 ## Cronograma
 * Acionamento dos motores (completa em 22/03)
 * Controle de tensão nos motores via PWM
+* Medição dos dados do acelerometro no APP
+* Envio dos dados de direção e sentido via bluetooth
+* Recebimento dos dados de direção e sentido no ucontrolador
+* Definição da relação entre dados do acelerometro e diferença na relação de PWM
 * Aferição de velocidade com um sensor optico
 * colocação das baterias
 * 
@@ -65,3 +69,5 @@ Como o circuito de ponte H escolhido não pode em hipotese alguma ter o os dois 
 
 ![PWM](https://i.ibb.co/jfv3VWc/TEK0000.png)
 
+# Controle de Direção e sentido
+Tanto o controle de direção quanto o de sentido serão feitas via aplicação em Android e transmitidas por bluetooth para o microcontrolador embarcado no carro, o controle de sentido sera feito via dois botões, um para ré e outro para frente, não precinado nenhum o carro fica parado, com a possibilidade de fixar uma velocidade constante. A direção sera feita via medição dos acelerometros do celular, que fara o celular nesse caso atuar como um volante.
