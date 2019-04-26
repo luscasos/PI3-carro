@@ -71,3 +71,21 @@ Como o circuito de ponte H escolhido não pode em hipotese alguma ter o os dois 
 
 # Controle de Direção e sentido
 Tanto o controle de direção quanto o de sentido serão feitas via aplicação em Android e transmitidas por bluetooth para o microcontrolador embarcado no carro, o controle de sentido sera feito via dois botões, um para ré e outro para frente, não precinado nenhum o carro fica parado, com a possibilidade de fixar uma velocidade constante. A direção sera feita via medição dos acelerometros do celular, que fara o celular nesse caso atuar como um volante.
+
+# Aplicativo Android
+O app é o mais simples possivel visualmente, suas funcionalidades são conectar-se a um dispositivo bluetooth já pareado e enviar os dados obtidos quando há uma variação nos sensores de aceleração. o sistema operacional fornece a aceleração no SI por meio de uma variavel long porém, como tamanha precisão não se faz necessaria a aceleração foi representada como um byte, onde para 'A' igual a -10 o byte é 0x00, já para 'A' igual a 0xFF
+
+
+<p>
+  Esta é a a configuração do dado enviado
+  <pre><code>byte dado[]=new byte[4];
+        dado[0]=y;
+        dado[1]=z;
+        dado[2]='\r';
+        dado[3]='\n';
+        connectedThread.write(dado);
+  </code></pre>
+</p>
+	
+![Aplicativo](https://i.ibb.co/M5RTsR4/Screenshot-2019-04-24-17-24-30-473-com-example-lucas-pi3.png)
+
