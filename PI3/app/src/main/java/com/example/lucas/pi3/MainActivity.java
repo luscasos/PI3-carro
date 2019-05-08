@@ -208,14 +208,38 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mAccy.setText("y = " + Float.toString(event.values[1]));
             mAccz.setText("z = " + Float.toString(event.values[2]));
             if(conectado){
+                byte y;
+                byte z;
+
                 char dados[]={(char)(event.values[1]*10)};//,(byte)(event.values[1]*10+127),(byte)(event.values[2]*10+127)};
                 String x = new String(dados);
                // connectedThread.write(";");
-               
-                connectedThread.write(Float.toString((event.values[1]*10+300)).substring(0,3)+Float.toString((event.values[2]*10+300)).substring(0,3)+'\n');
+                y =(byte)(event.values[1]*12.7+127);
+                if(event.values[1]>9.5){
+                    y=(byte)255;
+                }else if(event.values[1]<-9.5){
+                    y=(byte)0;
+                }
+
+                z =(byte)(event.values[2]*12.7+127);
+                if(event.values[2]>9.5){
+                    z=(byte)255;
+                }else if(event.values[2]<-9.5){
+                    z=(byte)0;
+                }
+
+
+                byte dado[]=new byte[4];
+                dado[0]=y;
+                dado[1]=z;
+                dado[2]='\r';
+                dado[3]='\n';
+
+                connectedThread.write(dado);
                 //byte x = (byte)(event.values[1]*10+127);
               //  connectedThread.write("Juca");
-                Log.d("dado yz","Y : "+Float.toString((event.values[1]*10+300)).substring(0,3)+" Z : "+Float.toString((event.values[2]*10+300)).substring(0,3));
+                //Log.d("dado enviado", y+";"+z+"\r\n");
+                Log.d("dado yz","Y : "+((int)y)+" Z : "+((int)z));
 //                Log.d("byte y",Byte.toString(dados[1]));
   //              Log.d("byte z",Byte.toString(dados[2]));
             }
@@ -389,21 +413,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
-                    Log.d("recebido",Integer.toString(bytes));
                     String dadosBt = new String(buffer,0,bytes);
+                    Log.d("recebido","y="+(int)buffer[0]+"z="+(int)buffer[1]+"[2]="+(int)buffer[2]+"[3]="+(int)buffer[3]);
+
                     // Send the obtained bytes to the UI activity
                     mHandler.obtainMessage(MESSAGE_READ, bytes, -1, dadosBt).sendToTarget();
 
                 } catch (IOException e) {
 
-                    //showNotification();
-                    try {
-                        meuSocket.connect();
-//                        mNotificationManager.cancelAll();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-
-                    }
+                    conectado=false;
                 }
             }
 
@@ -414,12 +432,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // connectedThread.write(string);   Para enviar dados
         /* Call this from the main activity to send data to the remote device */
-        public void write(String dadosEnviar) {
+        public void write(byte[] msgBuffer) {
 
-            byte[] msgBuffer = dadosEnviar.getBytes();
+            //byte[] msgBuffer = dadosEnviar.getBytes();
             try {
                 mmOutStream.write(msgBuffer);
-                sleep(10);
+                sleep(20);
             } catch (IOException ignored) { } catch (InterruptedException e) {
                 e.printStackTrace();
             }

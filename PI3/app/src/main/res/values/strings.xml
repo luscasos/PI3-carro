@@ -2,7 +2,7 @@
     <string name="app_name">PI3</string>
     <string name="primeiroBotaoAct">Conectar</string>
     <string name="act_main_gyroscope_label">Giroscopio</string>
-    <string name="act_main_accelerometer_label">Acelerómetro</string>
+    <string name="act_main_accelerometer_label">Acelerômetro</string>
 
     <string name="act_main_no_acuracy">Sin Suficiente presición</string>
 </resources>

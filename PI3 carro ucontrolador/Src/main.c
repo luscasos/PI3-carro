@@ -20,7 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include <string.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "i2c-lcd.h"
@@ -71,7 +71,8 @@ void SetDirecao();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-int y,z;
+uint8_t z=127;
+int8_t y=0;
 
 /* USER CODE END 0 */
 
@@ -334,103 +335,70 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 void ReadAcelerometro(){
-	uint8_t buffer[7];
-	char dado[7];
-	HAL_UART_Receive(&huart1,buffer,7,200);
-	HAL_UART_Transmit(&huart1,buffer,7,100);
+	uint8_t buffer[4];
+	HAL_StatusTypeDef recive;
+	char buf[10];
+	char buf2[10];
 
+	recive = HAL_UART_Receive(&huart1,buffer,4,10);
+	//HAL_UART_Transmit(&huart1,buffer,4,10);
 
-	dado[0]=buffer[1];
-	dado[1]=buffer[2];
-	dado[2]=buffer[3];
+	if(recive==HAL_OK){
 
-	y = atoi(dado);
-	dado[0]=buffer[4];
-	dado[1]=buffer[5];
-	dado[2]=buffer[6];
-	z = atoi(dado);
+		//HAL_UART_Transmit(&huart1,buffer,4,5);
+
+		if(buffer[2]=='\r' && buffer[3]=='\n'){
+			y=buffer[0];
+			itoa(y,buf,10);
+			z=buffer[1];
+			itoa(z,buf2,10);
+			strcat(buf,buf2);
+			strcat(buf,"\r\n");
+			//HAL_UART_Transmit(&huart1,buf,10,10);
+
+		}
+	}
 }
 
 void SetDirecao(){
-	if(z>300&&y>300){
-		z-=300;
-		y-=300;
-		if(z<10){
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-		}else{
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,(z-y)*32+3600);
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,(z+y)*32+3600);
+		int pwm1=0;
+		int pwm2=0;
+		if(z>140){	// frente
+			pwm1=(z-127)*24+4100;
+			if(pwm1>8000)
+				pwm1=8000;
+			pwm2=(z-127)*24+4100;
+			if(pwm2>8000)
+				pwm2=8000;
 
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,pwm1);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,pwm2);
 			HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_1);
 			HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_2);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 		}
-
-
-	}else if(z>300 && y<300 && y>200){
-		z-=300;
-		y-=300;
-		if(z<10){
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
+		else if(z<114){	// ré
+			pwm1=(-z+127)*24+4100;
+			if(pwm1>8000)
+				pwm1=8000;
+			pwm2=(-z+127)*24+4100;
+			if(pwm2>8000)
+				pwm2=8000;
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,pwm1);
+			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,pwm2);
+			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
+			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
+			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
 		}else{
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,(z-y)*32+3600);
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,(z+y)*32+3600);
+			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
+			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 			HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_1);
 			HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_2);
-			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 		}
-
-
-	}else if(z<300 && y<300 && y>200 && z>200){
-		z-=300;
-		y-=300;
-		if(z>10){
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-		}else{
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,(-z+y)*32+3600);
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,(-z-y)*32+3600);
-			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
-			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
-			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-		}
-
-	}else if(z<300 && y>300 && z>200){
-		z-=300;
-		y-=300;
-		if(z>10){
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-		}else{
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,(-z+y)*32+3600);
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,(-z-y)*32+3600);
-			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
-			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
-			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-		}
-
-
 
 	}
-
-
-
-}
-
 
 
 /* USER CODE END 4 */
