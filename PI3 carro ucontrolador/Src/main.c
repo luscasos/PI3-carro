@@ -20,17 +20,20 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <string.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "i2c-lcd.h"
+//#include "i2c-lcd.h"
 //#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+#define ConstanteDeVelocidade 24//23,67 	// (distanciaPorPulso/tempo)*0,036 para km/h 1.052433539/100m
 
 /* USER CODE END PTD */
 
@@ -45,9 +48,10 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
+ADC_HandleTypeDef hadc1;
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 
@@ -60,19 +64,30 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_I2C1_Init(void);
+static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void ReadAcelerometro();
-void SetDirecao();
 
+void SetDirecao();
+int SomaMovel(int novaAquisicao,int valorAtual,int *it,int*buf);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-uint8_t z=127;
-int8_t y=0;
+volatile uint8_t z=127;
+volatile uint8_t y=127;
+volatile int toggleLeftEncoder=0;
+volatile int toggleRightEncoder=0;
+volatile int velocidadeR=0;
+volatile int velocidadeL=0;
+int BufferR[16]={0};
+int k=0;
+int BufferL[16]={0};
+int l=0;
+char txBuffer[20]={0};
+char rxBuffer[24];
 
 /* USER CODE END 0 */
 
@@ -106,14 +121,19 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   MX_USART1_UART_Init();
-  MX_I2C1_Init();
+  MX_ADC1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_Base_Start_IT(&htim2);
+
 //  HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 //  HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);
 //  HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 //  HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_2);
   //lcd_init();
+
+	HAL_UART_Receive_IT(&huart1,(uint8_t *)rxBuffer,4);
 
 
   /* USER CODE END 2 */
@@ -123,12 +143,9 @@ int main(void)
   while (1)
   {
 
-	  ReadAcelerometro();
+	  //ReadAcelerometro();
 
 	  SetDirecao();
-
-	  HAL_Delay(1);
-
 
     /* USER CODE END WHILE */
 
@@ -145,6 +162,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
@@ -169,39 +187,56 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C1_Init(void)
-{
-
-  /* USER CODE BEGIN I2C1_Init 0 */
-
-  /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
-
-  /* USER CODE END I2C1_Init 1 */
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 400000;
-  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c1.Init.OwnAddress1 = 0;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN I2C1_Init 2 */
+}
 
-  /* USER CODE END I2C1_Init 2 */
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+  /** Common config 
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
 
 }
 
@@ -286,6 +321,51 @@ static void MX_TIM1_Init(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  // f=fcpu/(1+prescaler)(1+period)
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 19;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 39999;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -325,40 +405,25 @@ static void MX_USART1_UART_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
+  /*Configure GPIO pins : LeftEncoder_Pin RightEncoder_Pin */
+  GPIO_InitStruct.Pin = LeftEncoder_Pin|RightEncoder_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
-
-void ReadAcelerometro(){
-	uint8_t buffer[4];
-	HAL_StatusTypeDef recive;
-	char buf[10];
-	char buf2[10];
-
-	recive = HAL_UART_Receive(&huart1,buffer,4,10);
-	//HAL_UART_Transmit(&huart1,buffer,4,10);
-
-	if(recive==HAL_OK){
-
-		//HAL_UART_Transmit(&huart1,buffer,4,5);
-
-		if(buffer[2]=='\r' && buffer[3]=='\n'){
-			y=buffer[0];
-			itoa(y,buf,10);
-			z=buffer[1];
-			itoa(z,buf2,10);
-			strcat(buf,buf2);
-			strcat(buf,"\r\n");
-			//HAL_UART_Transmit(&huart1,buf,10,10);
-
-		}
-	}
-}
 
 void SetDirecao(){
 		int pwm1=0;
@@ -399,6 +464,61 @@ void SetDirecao(){
 		}
 
 	}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	if(rxBuffer[2]=='\r' && rxBuffer[3]=='\n'){
+		y=rxBuffer[0];
+		z=rxBuffer[1];
+	}
+	HAL_UART_Receive_IT(&huart1,(uint8_t *)rxBuffer,4);
+}
+
+//void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart){
+//}
+
+ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	 if(GPIO_Pin==LeftEncoder_Pin){
+	 		 toggleLeftEncoder+=1;
+	 }else if(GPIO_Pin==RightEncoder_Pin){
+	 		 toggleRightEncoder+=1;
+	 }
+
+}
+
+ int nAquisicoesLeft=0;
+ int nAquisicoesRight=0;
+
+ void TIM2_IRQHandler(void)
+ {
+	 nAquisicoesLeft=SomaMovel(toggleLeftEncoder, nAquisicoesLeft,&l,BufferL);
+	 nAquisicoesRight=SomaMovel(toggleRightEncoder, nAquisicoesRight,&k,BufferR);
+
+
+		//(velocidadeL,(char*)buf,10);
+		//HAL_UART_Transmit_IT(&huart1,,4);
+	 snprintf(txBuffer,20,"L %d : R %d\n",ConstanteDeVelocidade*nAquisicoesLeft/2,ConstanteDeVelocidade*nAquisicoesRight/2);
+
+	HAL_UART_Transmit_IT(&huart1,(uint8_t *)txBuffer,strlen(txBuffer));
+
+	 toggleRightEncoder=0;
+	 toggleLeftEncoder=0;
+
+   HAL_TIM_IRQHandler(&htim2);
+
+ }
+
+
+
+ int SomaMovel(int novaAquisicao,int valorAtual,int *it,int*buf){
+ 	valorAtual=novaAquisicao+valorAtual-buf[*it];
+ 	buf[*it]=novaAquisicao;
+  	*it=*it+1;
+    *it=*it&0xF;
+  	return valorAtual;
+  }
+
 
 
 /* USER CODE END 4 */

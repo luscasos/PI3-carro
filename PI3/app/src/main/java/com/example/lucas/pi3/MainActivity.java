@@ -1,37 +1,37 @@
 package com.example.lucas.pi3;
 
 
-        import android.app.Activity;
-        import android.bluetooth.BluetoothAdapter;
-        import android.bluetooth.BluetoothDevice;
-        import android.bluetooth.BluetoothSocket;
-        import android.content.Context;
-        import android.content.Intent;
-        import android.content.pm.ActivityInfo;
-        import android.hardware.Sensor;
-        import android.hardware.SensorEvent;
-        import android.hardware.SensorEventListener;
-        import android.hardware.SensorManager;
-        import android.media.MediaPlayer;
-        import android.os.Handler;
-        import android.os.Message;
-        import android.support.v7.app.AppCompatActivity;
-        import android.os.Bundle;
-        import android.util.Log;
-        import android.view.Menu;
-        import android.view.MenuInflater;
-        import android.view.MenuItem;
-        import android.view.MotionEvent;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.TextView;
-        import android.widget.Toast;
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
-        import java.io.IOException;
-        import java.io.InputStream;
-        import java.io.OutputStream;
-        import java.util.Objects;
-        import java.util.UUID;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Objects;
+import java.util.UUID;
 
 
 /**
@@ -70,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     //Button frente;
     //Button re;
+
+    byte y=127;
+    byte z=127;
     boolean conectado=false;
 
     /**
@@ -81,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
      */
     private SensorManager mSensorManager;
     private Sensor mSensorAcc;
-    private Sensor mSensorGyr;
+    //private Sensor mSensorGyr;
     private long mShakeTime = 0;
     private long mRotationTime = 0;
 
@@ -107,9 +110,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // Instanciate the sound to use
 
-       // mGyrox = (TextView) findViewById(R.id.gyro_x);
-       // mGyroy = (TextView) findViewById(R.id.gyro_y);
-       // mGyroz = (TextView) findViewById(R.id.gyro_z);
+        // mGyrox = (TextView) findViewById(R.id.gyro_x);
+        // mGyroy = (TextView) findViewById(R.id.gyro_y);
+        // mGyroz = (TextView) findViewById(R.id.gyro_z);
         mAccx = (TextView) findViewById(R.id.accele_x);
         mAccy = (TextView) findViewById(R.id.accele_y);
         mAccz = (TextView) findViewById(R.id.accele_z);
@@ -135,14 +138,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (msg.what == MESSAGE_READ){
                     String recebidos = (String) msg.obj;
                     dadosRecebidos.append(recebidos);           // acumula dados recebidos
-                    int fimInformacao = dadosRecebidos.indexOf("}");
+                    int fimInformacao = dadosRecebidos.indexOf("\n");
 
-                    //Log.d("Recebidos parcial",recebidos);
+                    Log.d("Recebidos parcial",recebidos);
 
                     if(fimInformacao > 0){
 
                         String dadosCompletos = dadosRecebidos.substring(0,fimInformacao);
-                        Log.d("Recebidos",dadosCompletos);
+                        Log.d("Recebidos:",dadosCompletos);
                         dadosRecebidos = new StringBuilder();       // reinicia o acumulador de dados
                     }
                 }
@@ -177,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mSensorAcc, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mSensorGyr, SensorManager.SENSOR_DELAY_NORMAL);
+       // mSensorManager.registerListener(this, mSensorGyr, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -208,12 +211,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             mAccy.setText("y = " + Float.toString(event.values[1]));
             mAccz.setText("z = " + Float.toString(event.values[2]));
             if(conectado){
-                byte y;
-                byte z;
-
-                char dados[]={(char)(event.values[1]*10)};//,(byte)(event.values[1]*10+127),(byte)(event.values[2]*10+127)};
-                String x = new String(dados);
-               // connectedThread.write(";");
                 y =(byte)(event.values[1]*12.7+127);
                 if(event.values[1]>9.5){
                     y=(byte)255;
@@ -234,14 +231,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 dado[1]=z;
                 dado[2]='\r';
                 dado[3]='\n';
-
-                connectedThread.write(dado);
                 //byte x = (byte)(event.values[1]*10+127);
-              //  connectedThread.write("Juca");
-                //Log.d("dado enviado", y+";"+z+"\r\n");
-                Log.d("dado yz","Y : "+((int)y)+" Z : "+((int)z));
-//                Log.d("byte y",Byte.toString(dados[1]));
-  //              Log.d("byte z",Byte.toString(dados[2]));
+                connectedThread.write(dado);
+                Log.d("dado enviado: y:", y+"; Z= "+z);
+                // Log.d("byte y",Byte.toString(dados[1]));
+                //              Log.d("byte z",Byte.toString(dados[2]));
             }
 
             detectShake(event);
@@ -413,15 +407,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);
+                    Log.d("recebido",Integer.toString(bytes));
                     String dadosBt = new String(buffer,0,bytes);
-                    Log.d("recebido","y="+(int)buffer[0]+"z="+(int)buffer[1]+"[2]="+(int)buffer[2]+"[3]="+(int)buffer[3]);
-
                     // Send the obtained bytes to the UI activity
                     mHandler.obtainMessage(MESSAGE_READ, bytes, -1, dadosBt).sendToTarget();
 
                 } catch (IOException e) {
 
-                    conectado=false;
                 }
             }
 
@@ -434,10 +426,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         /* Call this from the main activity to send data to the remote device */
         public void write(byte[] msgBuffer) {
 
-            //byte[] msgBuffer = dadosEnviar.getBytes();
+
             try {
                 mmOutStream.write(msgBuffer);
-                sleep(20);
+                sleep(5);
             } catch (IOException ignored) { } catch (InterruptedException e) {
                 e.printStackTrace();
             }

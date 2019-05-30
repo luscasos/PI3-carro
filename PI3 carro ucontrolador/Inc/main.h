@@ -60,6 +60,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LeftEncoder_Pin GPIO_PIN_10
+#define LeftEncoder_GPIO_Port GPIOB
+#define LeftEncoder_EXTI_IRQn EXTI15_10_IRQn
+#define RightEncoder_Pin GPIO_PIN_11
+#define RightEncoder_GPIO_Port GPIOB
+#define RightEncoder_EXTI_IRQn EXTI15_10_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
