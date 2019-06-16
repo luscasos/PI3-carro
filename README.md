@@ -21,6 +21,7 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 	
 ## Cronograma
 * Acionamento dos motores
+* Definição do circuito regulador de tensão
 * Controle de tensão nos motores via PWM
 * Medição dos dados do acelerometro no APP
 * Envio dos dados de direção e sentido via bluetooth
@@ -28,7 +29,8 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 * Definição da relação entre dados do acelerometro e diferença na relação de PWM
 * Aferição de velocidade com encoder 
 * colocação das baterias
-* 
+* Medição da tensão em cada bateria
+
 
 
 
@@ -64,12 +66,11 @@ Montado os dois circuitos de acinamento alimentados em 5V foi obtido uma tensão
 Circuito final de alimentação dos motores, com queda de 0,4V de tensão na carga em relação a VCC e corrente de polarização externa de 640pA, não exigindo muita corrente do microcontrolador.
 ![Ponte H](https://i.ibb.co/ZXjB03W/ponte.png)
 
+* ## Microcontrolador
+Para controle do carro foi utilizado o stm32f103, na sua versão de desenvolvimento conhecido como "blue pill", que possui um cortex M3 com um clock de 72MHz e que conta com 20kb de RAM, quatro Timers, dois ADCs entre outros, que serão usados na aplicação.
 
-### Controle de velocidade
-O controle da velocidade vai ser feito por meio da tecnica de modulação PWM, via microcontrolador atuando sobre a ponte H.
-Como o circuito de ponte H escolhido não pode em hipotese alguma ter o os dois transistores de atuação polarizados ao mesmo tempo, optou-se por ultilizar o PWM no modo normal e no modo inverso, de forma a construir um sistama redundante nesse sendido, se houver uma falha no software mesmo assim não havera um problema critico na ponte H.
+![STM](https://wiki.stm32duino.com/images/thumb/d/db/STM32_Blue_Pill_perspective.jpg/300px-STM32_Blue_Pill_perspective.jpg)
 
-![PWM](https://i.ibb.co/jfv3VWc/TEK0000.png)
 
 * ## Comunicação
 Como a comunicação entre celular e carro é feita via bluetooth foi escolhido o modulo HC-05, que trata todo o protocolo de comuncação e se comunica com microcontrolador via UART, sendo de facil uso e configuração.
@@ -91,7 +92,7 @@ Como o conjunto de baterias tem como tensão 7,4V na saida, é necessario baixar
 ![Regulador](https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRjVENEgTrkiV1Vze6-s10tEys9r3vkaPzhg1qAIwBDORowJBwdG1PJLQN5fljmezylaK7oFhByX1NvVY5adCad2kIMTrO27W_udAmgpGz_5cjcbanmmh95&usqp=CAc)
 
 * ## Medição da tensão das baterias
-Como regra geral, não se pode descarregar uma bateria abaixo de uma certa tensão, com as usadas nesse projeto não é diferente, não sendo recomendado baixar a tensão da marca dos 3V, como o sistema possui duas baterias é necessario medir a tensão delas individualmente. O conversor analogico digital do microcontrolador tem como tensão base 3V, então é preciso baixar as tensões para menos de 3V, o circuito usado para isso é o diferencial com ampop, que pode dar um ganho menor que 1, sem usar tensão negativa. O Ampop escolhido foi o LM324.
+Como regra geral, não se pode descarregar uma bateria abaixo de uma certa tensão, com as usadas nesse projeto não é diferente, não sendo recomendado baixar a tensão da marca dos 3V, como o sistema possui duas baterias é necessario medir a tensão delas individualmente. O conversor analogico digital do microcontrolador tem como tensão base 3V, então é preciso baixar as tensões para menos de 3V, o circuito usado para isso é o diferencial com ampop, que pode dar um ganho menor que 1, sem usar tensão negativa. O Ampop escolhido foi o LM324, com ganho de 1/3 para a tensão superior (bateria 1 em serie com a bateria 2), e de 2/3 para a tensão media (bateria 1). 
 ![diferencial](http://www.c2o.pro.br/hackaguas/figuras/amplificador_operacional_diferencial.png)
 
 
@@ -99,7 +100,21 @@ Como regra geral, não se pode descarregar uma bateria abaixo de uma certa tens�
 Com todos os requisitos de Hardware definidos foi desenvolvido o esquematico e placa do projeto
 
 ![esquematico](https://i.ibb.co/CJ0CqbJ/esquematico-completo.png)
+![Placa 3d](https://i.ibb.co/C7m8LZ0/Placa-3d.png)
 
+# Software do microcontrolador
+
+* ## Controle de velocidade
+O controle da velocidade vai ser feito por meio da tecnica de modulação PWM, via microcontrolador atuando sobre a ponte H.
+Como o circuito de ponte H escolhido não pode em hipotese alguma ter o os dois transistores de atuação polarizados ao mesmo tempo, optou-se por ultilizar o PWM no modo normal e no modo inverso, de forma a construir um sistama redundante nesse sendido, se houver uma falha no software mesmo assim não havera um problema critico na ponte H.
+
+![PWM](https://i.ibb.co/jfv3VWc/TEK0000.png)
+
+A implementação foi feita via dois Timers, com frequência fixa em 1kHz, em ambos usando o canal 1 e o canal 1N, trabalhando sempre com pelo menos um deles desligado. Sabendo que a velocidade vai ser transmitida pelo aplicativo em 1Byte, com 256 possibilidades, de -128 a 127. Sendo assim o valor 127 corresponde a 100% da velocidade para frente, enquanto -128 corresponde a 100% da velocidade na ré.
+Como os motores possuem uma intercia, não sera qualquer valor de tensão que dará partida no carro, sabendo disso pode-se dar um offset no valor do pwm, nesse caso escolhi cerca de 45% de razão ciclica, o que é suficiente para dar partida nos motores.
+
+* ## Medição das baterias
+A medição das baterias foi feita por um ADC, utilizando dois canais, um para a tensão total (bateria 1 em serie com a bateria 2) e um canal para a tensã da bateria 1, lembrando que estas tensões já receberam um ganho de 1/3 (tensão total) e 2/3 (tensão da bateria 1). então levando em cosideração esse ganho e os dois canais pode-se medir individualmente a tensão de cada bateria para que o sistema possa desligar os motores e avisar o usuário que a carga das baterias esta crítica.
 
 
 # Controle de Direção e sentido
