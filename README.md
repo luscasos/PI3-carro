@@ -1,6 +1,6 @@
 # Projeto integrador III
 
-![Hardware base](https://www.dhresource.com/0x0s/f2-albu-g7-M01-06-F9-rBVaSls0mXOACrsVAAHXBK3wNPo734.jpg/rob-um-conjunto-diy-inteligente-eletr-nica.jpg)
+![Hardware base](https://lh3.googleusercontent.com/lKCM-QOX4O0vXTbmpL1GnKnO1AgouW_Xtcs-vV10h2r9e9j-Wn85lpZ4NecxGA7ihArN1vCF10qv2os5BOLsQNnMu7p7KpV6A363Fn4ztpbh4Jh-znyAuMy1eKMesmeCVRFPeCPoRh3Afm_JoS5EwClGptiw4hmR9mw8SQj7-BoS1ty_7ofOdR92MPO22WR3H7iGzWSkZNwWuU7mtmAqeTbqI0qZ6bUhQ4amdY9frTZQeRZfDJEpThCSkbNWRiep9FO46uOmb--bQ8Y8uhT5iPlXvdOOERD88UNe7zbGSCIyVFmoNNMNqTzOwCeHrn2suEtnKUKU2ybC-kmwTskIMluDfS3iuQGao65CxWPKVJ1s7XCCkAZT3RZVxRy-d3pgpGr4pxC7A0mFL9OoHtA_NL2cbi38HswGPluUfKM6MA1OqCHfTmnJSRIfy8ZeoaBJHsXvtQqgqEbZM2uPHN2DLmoeuqQw-0i2v1m8aIY3B1u493e79--2if8Qo-uZhOcKvOf-EpFEaiPJLapTBCif6ZtJYD5t4WT7t2rt_u0xEFOuj93ddNQyS1MmyOJQ615e4QWvKipyTS4KlCL3w_X2UUvl55IusHd4Zgi5XJVO5RRa2AIrdRvh8laLNEHyz5l-Q6Inwm591RwGv0U3qk4Cp4XYlcXNA3lk=w834-h625-no)
 
 ## Informações gerais
 Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng. Eletrônica do IFSC campus Florianopolis no primeiro semestre de 2019, esse projeto tem como objetivo utilizar os conhecimentos obtidos ao decorrer do curso, implementando um carro controlado via aplicativo android.
@@ -10,7 +10,6 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 * Comunicação via bluetooth
 * Sensoreamento de velocidade e transmição para o app 
 * Controle de velocidade via aplicativo 
-* Aferição de distancia percorrida 
 * Controle da bateria
 
 ## Tecnologias
@@ -19,21 +18,6 @@ Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng
 * Microcontrolador STM32
 * Bateria de íon de lítio
 	
-## Cronograma
-* Acionamento dos motores
-* Definição do circuito regulador de tensão
-* Controle de tensão nos motores via PWM
-* Medição dos dados do acelerometro no APP
-* Envio dos dados de direção e sentido via bluetooth
-* Recebimento dos dados de direção e sentido no ucontrolador
-* Definição da relação entre dados do acelerometro e diferença na relação de PWM
-* Aferição de velocidade com encoder 
-* colocação das baterias
-* Medição da tensão em cada bateria
-
-
-
-
 # Hardware
 
 * ## Acionamento dos motores
@@ -98,9 +82,14 @@ Como regra geral, não se pode descarregar uma bateria abaixo de uma certa tens�
 
 * ## Placa de circuito
 Com todos os requisitos de Hardware definidos foi desenvolvido o esquematico e placa do projeto
-
 ![esquematico](https://i.ibb.co/CJ0CqbJ/esquematico-completo.png)
 ![Placa 3d](https://i.ibb.co/C7m8LZ0/Placa-3d.png)
+
+![carro visto de cima](https://lh3.googleusercontent.com/XHgXW_0hG--oXE6uksJy7TSglDY0m_3GjwJ7JpxUj3nDGJl_j5kw8t41qFqI3KVQebgnOixmsnlhJWuOOmGEBwOP9TRfeRpaNYIoX5CaxXfUMoYwmZtibPrEwG1qelVRuH2Ht5bJxe4XIjcndk-vlNCzfa9I7wqE4hAHR1dnG9Mfc3DZOrcGQJZJ0kBpwk9WV5Z9XiZtq6caUjpY_Q7VtCFR3JaJ_YBxzC-LkU3g2XBaja3BT3_fmBItKwr26wGlN6lZX_U7AkY6bs6LvmjEq5iOWTZNz4afp40fs5y9rJixaFzpfDbfBVEDrs0u2O9NK0jaZ4a9uIYgn0f3tjlfhU8jnNGRl1VR19TjuiiqR0hocCxPJ9riAJDEJIjA1NgjUYk4Xx2mlM_v-yGQa8YbQL12lg2yes7WE5hrMUiF4CzDNctjAm7OMXmLvNUfbgQy8PAeBzc5-pytBM97ovhWTkDPTlwB7liflztpgzAt_ofb0G7sJkzYhrtdks1Wjh2jRRSgqJkcDEL9xNpR5TW52FUpuHmS73J9A8qpl3OOT7A1xmlFHrEYquWsuQV0Y9VU__CJYoH0DgZiMnmrZ7rgj7_4ZiPkOW8a8d2uS4X-kfckcw_2nx95IqOZOPg0rupB53jOHk49uN-mZHuJSVyK8SPyz_P_3JVU=w469-h625-no)
+
+A placa de circuito impresso foi projetada para que o circuito de comunicação bluetooth ficasse longe do principal foco do ruido do circuito, que são os motores, contudo ainda foi deixado o uC ao lado dos motores e das pontes H, uma implementação mais correta seria distanciar esses dois componentes geradores de ruido, juntamente com o regulador de tensão. e acoplar o sensor de velocidade de outra maneira, que não por cabos longos como foi projetado, essas e outras correções foram feitas em outra placa a ser utilizada em disciplinas ligadas a programação de microcontroladores.
+
+O carro também foi objeto de estudo por uma dupla de colegas dentro da disciplina de compatibilidade eletromagnetica, estando todos dados disponiveis no link https://github.com/lsmanoel/CEM_
 
 # Software do microcontrolador
 
@@ -115,6 +104,19 @@ Como os motores possuem uma intercia, não sera qualquer valor de tensão que da
 
 * ## Medição das baterias
 A medição das baterias foi feita por um ADC, utilizando dois canais, um para a tensão total (bateria 1 em serie com a bateria 2) e um canal para a tensã da bateria 1, lembrando que estas tensões já receberam um ganho de 1/3 (tensão total) e 2/3 (tensão da bateria 1). então levando em cosideração esse ganho e os dois canais pode-se medir individualmente a tensão de cada bateria para que o sistema possa desligar os motores e avisar o usuário que a carga das baterias esta crítica.
+
+* ## Medição da velocidade
+A velocidade é calculada com base na variação de um sensor optico e como a roda perfurada possui 20 furos, para cada uma volta da roda são medidas 20 alternancias no sensor, com isso e o diametro da roda é possivel saber a distancia percorrida por pulso. Além da componente de distancia é necessario saber o tempo entre medições, nesse caso foi utilizada um tempo de 100ms.
+
+![equacao](https://i.ibb.co/YcLZTSq/pi.png)
+onde n é o numero de pulsos por periodo
+
+Também foi implementado um [filtro media movel](http://borgescorporation.blogspot.com/2013/05/filtro-de-media-movel.html
+) de 16 fatores afim de filtrar ruidos indesejados
+
+* ## Comunicação
+A comunicação entre o microcontrolador e o modulo bluetooth HC-05 é feita via UART que possui hardware dedicado na maioria dos microcontroladores, então a implementação consiste basicamente em criar um pacote de dados para envio de todos os parametros juntos no formato "00;00;00;00". O tratamento de dados recebidos pelo uC é feito por interrupção, reconhecendo o final do dado, que é "\r\n" e separando os demais bits, que são as cordenadas Y e Z.
+
 
 
 # Controle de Direção e sentido
