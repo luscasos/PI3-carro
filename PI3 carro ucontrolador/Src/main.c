@@ -33,7 +33,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-#define ConstanteDeVelocidade 24//23,67 	// (distanciaPorPulso/tempo)*0,036 para km/h 1.052433539/100m
+#define ConstanteDeVelocidade 23//23,67 	// (distanciaPorPulso/tempo)*0,036 para km/h 1.052433539/100m
 
 /* USER CODE END PTD */
 
@@ -85,9 +85,16 @@ volatile int velocidadeL=0;
 int BufferR[16]={0};
 int k=0;
 int BufferL[16]={0};
-int l=0;
-char txBuffer[20]={0};
+int m=0;
+char txBuffer[32]={0};
+char tx2Buffer[20]={0};
 char rxBuffer[24];
+
+volatile int adc_value_1;
+volatile int adc_value_2;
+
+
+
 
 /* USER CODE END 0 */
 
@@ -126,6 +133,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Base_Start_IT(&htim2);
+  HAL_ADC_Init(&hadc1);
+
 
 //  HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 //  HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);
@@ -134,8 +143,7 @@ int main(void)
   //lcd_init();
 
 	HAL_UART_Receive_IT(&huart1,(uint8_t *)rxBuffer,4);
-
-
+	//HAL_ADC_Start(&hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -144,6 +152,13 @@ int main(void)
   {
 
 	  //ReadAcelerometro();
+	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1,100);
+	  adc_value_1 = HAL_ADC_GetValue(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1,100);
+	  adc_value_2 = HAL_ADC_GetValue(&hadc1);
+	  HAL_ADC_Stop(&hadc1);
+
 
 	  SetDirecao();
 
@@ -215,12 +230,12 @@ static void MX_ADC1_Init(void)
   /** Common config 
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 2;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -229,7 +244,15 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_55CYCLES_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel 
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -338,7 +361,6 @@ static void MX_TIM2_Init(void)
   /* USER CODE BEGIN TIM2_Init 1 */
 
   /* USER CODE END TIM2_Init 1 */
-  // f=fcpu/(1+prescaler)(1+period)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 19;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -414,7 +436,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : LeftEncoder_Pin RightEncoder_Pin */
   GPIO_InitStruct.Pin = LeftEncoder_Pin|RightEncoder_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
@@ -429,12 +451,13 @@ void SetDirecao(){
 		int pwm1=0;
 		int pwm2=0;
 		if(z>140){	// frente
-			pwm1=(z-127)*24+4100;
-			if(pwm1>8000)
-				pwm1=8000;
-			pwm2=(z-127)*24+4100;
-			if(pwm2>8000)
-				pwm2=8000;
+				pwm1=(z-127+(y-127))*24+4100;
+				if(pwm1>8000){
+					pwm1=8000;
+				}
+					pwm2=(z-127-(y-127))*24+4100;
+				if(pwm2>8000)
+					pwm2=8000;
 
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,pwm1);
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2,pwm2);
@@ -444,10 +467,10 @@ void SetDirecao(){
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 		}
 		else if(z<114){	// ré
-			pwm1=(-z+127)*24+4100;
+			pwm1=(-z+127+(y-127))*24+4100;
 			if(pwm1>8000)
 				pwm1=8000;
-			pwm2=(-z+127)*24+4100;
+			pwm2=(-z+127-(y-127))*24+4100;
 			if(pwm2>8000)
 				pwm2=8000;
 			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,pwm1);
@@ -456,7 +479,7 @@ void SetDirecao(){
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
 			HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-		}else{
+		}else{ // para
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 			HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_1);
@@ -492,23 +515,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 
  void TIM2_IRQHandler(void)
  {
-	 nAquisicoesLeft=SomaMovel(toggleLeftEncoder, nAquisicoesLeft,&l,BufferL);
 	 nAquisicoesRight=SomaMovel(toggleRightEncoder, nAquisicoesRight,&k,BufferR);
+	 nAquisicoesLeft=SomaMovel(toggleLeftEncoder, nAquisicoesLeft,&m,BufferL);
+	 toggleRightEncoder=0;
+	 toggleLeftEncoder=0;
 
 
 		//(velocidadeL,(char*)buf,10);
 		//HAL_UART_Transmit_IT(&huart1,,4);
-	 snprintf(txBuffer,20,"L %d : R %d\n",ConstanteDeVelocidade*nAquisicoesLeft/2,ConstanteDeVelocidade*nAquisicoesRight/2);
+	 snprintf(txBuffer,32,"%d;%d;%d;%d\n",ConstanteDeVelocidade*nAquisicoesLeft/200,
+			 ConstanteDeVelocidade*nAquisicoesRight/200,(int)(10*adc_value_1*0.00122),(int)(10*adc_value_2*0.00273-10*adc_value_1*0.00122));
 
 	HAL_UART_Transmit_IT(&huart1,(uint8_t *)txBuffer,strlen(txBuffer));
 
-	 toggleRightEncoder=0;
-	 toggleLeftEncoder=0;
+
 
    HAL_TIM_IRQHandler(&htim2);
+   //HAL_ADC_Start_IT(&hadc1); // Re-Start ADC1 under Interrupt
+
 
  }
-
 
 
  int SomaMovel(int novaAquisicao,int valorAtual,int *it,int*buf){

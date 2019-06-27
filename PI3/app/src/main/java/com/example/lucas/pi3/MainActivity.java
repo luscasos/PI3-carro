@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ConnectedThread connectedThread;
 
-    //Button frente;
+    Button startStop;
+    boolean start=false;
     //Button re;
 
     byte y=127;
@@ -91,9 +92,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     /**
      * UI
      */
-    private TextView mGyrox;
-    private TextView mGyroy;
-    private TextView mGyroz;
+    private TextView bat1;
+    private TextView bat2;
+    private TextView vel1;
+    private TextView vel2;
     private TextView mAccx;
     private TextView mAccy;
     private TextView mAccz;
@@ -110,15 +112,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         // Instanciate the sound to use
 
-        // mGyrox = (TextView) findViewById(R.id.gyro_x);
-        // mGyroy = (TextView) findViewById(R.id.gyro_y);
-        // mGyroz = (TextView) findViewById(R.id.gyro_z);
+         bat1 = (TextView) findViewById(R.id.textView);
+         bat2 = (TextView) findViewById(R.id.textView2);
+        vel1 = (TextView) findViewById(R.id.textView3);
+        vel2 = (TextView) findViewById(R.id.textView4);
         mAccx = (TextView) findViewById(R.id.accele_x);
         mAccy = (TextView) findViewById(R.id.accele_y);
         mAccz = (TextView) findViewById(R.id.accele_z);
-
+        bat1.setText("Bat: ");
+        bat2.setText("Bat: ");
+        vel1.setText("Vel dir: ");
+        vel2.setText("Vel esq: ");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        //frente = findViewById(R.id.frente);
+        startStop = findViewById(R.id.button3);
+        startStop.setText("Start");
         //re = findViewById(R.id.re);
 
         // Verifica se há suporte a bluetooth
@@ -138,13 +145,49 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (msg.what == MESSAGE_READ){
                     String recebidos = (String) msg.obj;
                     dadosRecebidos.append(recebidos);           // acumula dados recebidos
-                    int fimInformacao = dadosRecebidos.indexOf("\n");
+                    int fimInformacao = dadosRecebidos.lastIndexOf("\n");
 
                     Log.d("Recebidos parcial",recebidos);
 
                     if(fimInformacao > 0){
 
                         String dadosCompletos = dadosRecebidos.substring(0,fimInformacao);
+                        int l=dadosCompletos.length();
+
+                        String dado4  = dadosCompletos.substring(dadosCompletos.lastIndexOf(";")+1,l);
+                        String dado1 = dadosCompletos.substring(0,dadosCompletos.indexOf(";"));
+                        String dado2 = dadosCompletos.substring(dadosCompletos.indexOf(";")+1,dadosCompletos.indexOf(";",dadosCompletos.indexOf(";")+1));
+                        String dado3 = dadosCompletos.substring(dadosCompletos.indexOf(";",dadosCompletos.indexOf(";",dadosCompletos.indexOf(";")+1))+1
+                                ,dadosCompletos.lastIndexOf(";"));
+
+                        StringBuilder stringBuilder = new StringBuilder(dado1);
+                        if(dado1.length()>0){
+                            stringBuilder.insert(stringBuilder.length()-1, ',');
+                        }
+                        StringBuilder stringBuilder1 = new StringBuilder(dado2);
+                        if(dado2.length()>0){
+                            stringBuilder1.insert(stringBuilder1.length()-1, ',');
+                        }
+                        StringBuilder stringBuilder2 = new StringBuilder(dado3);
+                        if(dado3.length()>0){
+                            stringBuilder2.insert(stringBuilder2.length()-1, ',');
+                        }
+                        StringBuilder stringBuilder3 = new StringBuilder(dado4);
+                        if(dado4.length()>0){
+                            stringBuilder3.insert(stringBuilder3.length()-1, ',');
+                        }
+                        bat1.setText("Bat: "+stringBuilder3.toString());
+                        bat2.setText("Bat: "+stringBuilder2.toString());
+                        vel1.setText("Vel dir: "+stringBuilder1.toString());
+                        vel2.setText("Vel esq: "+stringBuilder.toString());
+
+
+                        dadosCompletos.substring(dadosCompletos.lastIndexOf(";"),l);
+
+
+                       // Log.d("dado:",bat2+" vel "+vel1+" vel2 "+vel2+ " bat1 "+bat1);
+                            //l=dadosCompletos.indexOf(";",l+1);
+                        //}
                         Log.d("Recebidos:",dadosCompletos);
                         dadosRecebidos = new StringBuilder();       // reinicia o acumulador de dados
                     }
@@ -164,14 +207,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //            }
 //        });
 //
-//        frente.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                Toast.makeText(getApplicationContext(), "solta",   Toast.LENGTH_SHORT).show();
-//                return false;
-//            }
-//        });
 
+        startStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                start=!start;
+                if(start)
+                        startStop.setText("Stop");
+                else
+                        startStop.setText("Start");
+            }
+        });
 
 
     }
@@ -227,11 +273,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
                 byte dado[]=new byte[4];
-                dado[0]=y;
-                dado[1]=z;
+
+                //byte x = (byte)(event.values[1]*10+127);
+                if(start){
+                    dado[0]=y;
+                    dado[1]=z;
+                }else{
+                    dado[0]=127;
+                    dado[1]=127;
+                }
                 dado[2]='\r';
                 dado[3]='\n';
-                //byte x = (byte)(event.values[1]*10+127);
                 connectedThread.write(dado);
                 Log.d("dado enviado: y:", y+"; Z= "+z);
                 // Log.d("byte y",Byte.toString(dados[1]));
