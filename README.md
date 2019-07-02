@@ -1,6 +1,6 @@
 # Projeto integrador III
 
-![Hardware base](https://lh3.googleusercontent.com/lKCM-QOX4O0vXTbmpL1GnKnO1AgouW_Xtcs-vV10h2r9e9j-Wn85lpZ4NecxGA7ihArN1vCF10qv2os5BOLsQNnMu7p7KpV6A363Fn4ztpbh4Jh-znyAuMy1eKMesmeCVRFPeCPoRh3Afm_JoS5EwClGptiw4hmR9mw8SQj7-BoS1ty_7ofOdR92MPO22WR3H7iGzWSkZNwWuU7mtmAqeTbqI0qZ6bUhQ4amdY9frTZQeRZfDJEpThCSkbNWRiep9FO46uOmb--bQ8Y8uhT5iPlXvdOOERD88UNe7zbGSCIyVFmoNNMNqTzOwCeHrn2suEtnKUKU2ybC-kmwTskIMluDfS3iuQGao65CxWPKVJ1s7XCCkAZT3RZVxRy-d3pgpGr4pxC7A0mFL9OoHtA_NL2cbi38HswGPluUfKM6MA1OqCHfTmnJSRIfy8ZeoaBJHsXvtQqgqEbZM2uPHN2DLmoeuqQw-0i2v1m8aIY3B1u493e79--2if8Qo-uZhOcKvOf-EpFEaiPJLapTBCif6ZtJYD5t4WT7t2rt_u0xEFOuj93ddNQyS1MmyOJQ615e4QWvKipyTS4KlCL3w_X2UUvl55IusHd4Zgi5XJVO5RRa2AIrdRvh8laLNEHyz5l-Q6Inwm591RwGv0U3qk4Cp4XYlcXNA3lk=w834-h625-no)
+![carro final](https://lh3.googleusercontent.com/LqoB6I_hYRhTCgJoQqegOzl3_oj7gsrVqQ5c9yX_i_Xo6xYGvLDxJsnojAWBJNjhxmzHD0BspGnEPaLkNhUkuf-XcLjGkCu5xpJwrxSQucMxPNFxM4Srg2RS2LRAV4o29il401KGduSMs51XkYtCGMXnTaaGRxnnhSsCVW6XOuGzkzcBZVruLBWwZCUnOP-29RjyosbSnP0yMVzpwi8JFfsi62fE4JLSlhi1bwFjSNZ7dnl0m-0cR0k-6nTqQJKW6LSHcenm64GIhWNn4-Uq78WMTc37R-z-R0q8UlM_zEGh4o-j_Pa4BfDYLLarCCNy3gHoF3rQOimbw_TxJydx5ukwH-DntfrE5e_nSltR6xrQOLRoesnQBqGU1WCrcoll3fU9buYY6XLcqI5ibuQTj-Cka71ccNh2hl3pNTGxrIoRQ6t-Tjs9Ooyqrp38w6M4EgNXUiwDjkttpdeRQhtKDDQCpPVcqwNN0yJ0Wkn-yLohpY0tWpTtRf5q8HEjIs81TEguVsGy0PcVpBn57RoicvlzY8XW4of2VdSLZj4FjdTlS02wUifk-bv8o-ZiQF0zlODx2_Q8170UNESlaFom_zm0k7eNTCuKspzPLWaJYYWfxwbx9QEjPWl6_a1wzMSXkil9XVIlGmABnskZ7MwDkwMSi-UUXM3O=w834-h625-no)
 
 ## Informações gerais
 Dessenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng. Eletrônica do IFSC campus Florianopolis no primeiro semestre de 2019, esse projeto tem como objetivo utilizar os conhecimentos obtidos ao decorrer do curso, implementando um carro controlado via aplicativo android.
@@ -123,12 +123,20 @@ A comunicação entre o microcontrolador e o modulo bluetooth HC-05 é feita via
 Tanto o controle de direção quanto o de sentido serão feitas via aplicação em Android e transmitidas por bluetooth para o microcontrolador embarcado no carro, o controle de sentido sera feito via dois botões, um para ré e outro para frente, não precinado nenhum o carro fica parado, com a possibilidade de fixar uma velocidade constante. A direção sera feita via medição dos acelerometros do celular, que fara o celular nesse caso atuar como um volante.
 
 # Aplicativo Android
-O app é o mais simples possivel visualmente, suas funcionalidades são conectar-se a um dispositivo bluetooth já pareado e enviar os dados obtidos quando há uma variação nos sensores de aceleração. o sistema operacional fornece a aceleração no SI por meio de uma variavel long porém, como tamanha precisão não se faz necessaria a aceleração foi representada como um byte, onde para 'A' igual a -10 o byte é 0x00, já para 'A' igual a 0xFF
+
+O aplicativo conta com as seguintes funcionalidades:
+
+* Botão de coneção bluetooth no canto superior direito, que é responsavel por ligar o bluetooth caso o mesmo esteja desligado, buscar a lista de dispositivos pareados e conectar no mesmo, iniciando a comunicação.
+* Botão Start/Stop responsavel por interromper ou não o fluxo de dados de aceleração do celular para o dispositivo pareado.
+* Texto central com os valores de aceleração individual dos eixos.
+* Texto na lateral esquerda com os valores de bateria e velocidade enviados pelo dispositivo conectado. 
+
+![Aplicativo](https://lh3.googleusercontent.com/T5aIZLYmc6zRDyDfLEqJC3oWj4Pd2Ac50nLRMcWeIVMvBAhJH4QnIqoNmZWGkuMOup17q_hcQBqf0fbI74OJFKL_JOTTJfrZmn1BqJRP3FT6PgIWjQsw8Crh39ej9xpUBQKmtby4ZbV0DjX2OEaTw3Kkup1uSGyfLJ0P7GQGtviut7T99Qi5z-OW3CYiEyorRHv7D4Z2RzXOyND6nf3d2-NozdS-ieg80q4pbMRHK8FsjqmBbwxWehvBI-EzKGPdD7ZxbudscNODAKRCJ72baIyvOktY5X1D8UwgkZtHmHkdRL8K8v3wFWlYl1jMJe109PldMfF9gIV1ILQUQxn1_tPLpX9A8WmtTJbkLfSOSvC0c6fW97XjhWFCW-Ppu9_RxbEHqrmtns13VYhcKkLoQGkFKgZklZqULzBxE5a0SuFaRjndmpOd_YRIyYpAA77Vrg0hb2U_iNaU9qX1FMpAYbVTsVSFnptJqyVm3inCmZuMEcCllJuct43Gb7sPlPFuDs2hFjaevUmjxI0CWDE59DHP62juBxGtQn3gqUU8uDF5ee-G46IDLvMsG32qyCrcRYfMW_F-Vfj25OeDrMhnPvsJObaxC_Z7uey1kcZlTlIxAe_JXIsGeNbbfgSUjdeABIyW29dERHd22aoSfuyPQK3680GnEAYf=w1112-h625-no)
 
 
 <p>
-  Esta é a a configuração do dado enviado
-  <pre><code>byte dado[]=new byte[4];
+A estrutura dos dados de aceleração é a seguinte: 
+<pre><code>byte dado[]=new byte[4];
         dado[0]=y;
         dado[1]=z;
         dado[2]='\r';
@@ -136,6 +144,8 @@ O app é o mais simples possivel visualmente, suas funcionalidades são conectar
         connectedThread.write(dado);
   </code></pre>
 </p>
+
+Já a estrutura dos dados recebidos tem que estar no seguinte formato :"00;00;00;00", sendo que o aplicativo insere uma virgula entre cada um dos valores.
 	
-![Aplicativo](https://i.ibb.co/M5RTsR4/Screenshot-2019-04-24-17-24-30-473-com-example-lucas-pi3.png)
+
 
