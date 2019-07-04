@@ -1,6 +1,6 @@
 # Projeto integrador III
 
-![carro final](https://lh3.googleusercontent.com/LqoB6I_hYRhTCgJoQqegOzl3_oj7gsrVqQ5c9yX_i_Xo6xYGvLDxJsnojAWBJNjhxmzHD0BspGnEPaLkNhUkuf-XcLjGkCu5xpJwrxSQucMxPNFxM4Srg2RS2LRAV4o29il401KGduSMs51XkYtCGMXnTaaGRxnnhSsCVW6XOuGzkzcBZVruLBWwZCUnOP-29RjyosbSnP0yMVzpwi8JFfsi62fE4JLSlhi1bwFjSNZ7dnl0m-0cR0k-6nTqQJKW6LSHcenm64GIhWNn4-Uq78WMTc37R-z-R0q8UlM_zEGh4o-j_Pa4BfDYLLarCCNy3gHoF3rQOimbw_TxJydx5ukwH-DntfrE5e_nSltR6xrQOLRoesnQBqGU1WCrcoll3fU9buYY6XLcqI5ibuQTj-Cka71ccNh2hl3pNTGxrIoRQ6t-Tjs9Ooyqrp38w6M4EgNXUiwDjkttpdeRQhtKDDQCpPVcqwNN0yJ0Wkn-yLohpY0tWpTtRf5q8HEjIs81TEguVsGy0PcVpBn57RoicvlzY8XW4of2VdSLZj4FjdTlS02wUifk-bv8o-ZiQF0zlODx2_Q8170UNESlaFom_zm0k7eNTCuKspzPLWaJYYWfxwbx9QEjPWl6_a1wzMSXkil9XVIlGmABnskZ7MwDkwMSi-UUXM3O=w834-h625-no)
+![carro final](https://i.ibb.co/ynxz6dS/IMG-20190626-154821.jpg)
 
 ## Informações gerais
 Desenvolvido no escopo da disciplina de Projeto Integrador III, do curso de Eng. Eletrônica do IFSC campus Florianópolis no primeiro semestre de 2019, esse projeto tem como objetivo utilizar os conhecimentos obtidos ao decorrer do curso, implementando um carro controlado via aplicativo Android.
@@ -131,7 +131,7 @@ O aplicativo conta com as seguintes funcionalidades:
 * Texto central com os valores de aceleração individual dos eixos.
 * Texto na lateral esquerda com os valores de bateria e velocidade enviados pelo dispositivo conectado. 
 
-![Aplicativo](https://lh3.googleusercontent.com/T5aIZLYmc6zRDyDfLEqJC3oWj4Pd2Ac50nLRMcWeIVMvBAhJH4QnIqoNmZWGkuMOup17q_hcQBqf0fbI74OJFKL_JOTTJfrZmn1BqJRP3FT6PgIWjQsw8Crh39ej9xpUBQKmtby4ZbV0DjX2OEaTw3Kkup1uSGyfLJ0P7GQGtviut7T99Qi5z-OW3CYiEyorRHv7D4Z2RzXOyND6nf3d2-NozdS-ieg80q4pbMRHK8FsjqmBbwxWehvBI-EzKGPdD7ZxbudscNODAKRCJ72baIyvOktY5X1D8UwgkZtHmHkdRL8K8v3wFWlYl1jMJe109PldMfF9gIV1ILQUQxn1_tPLpX9A8WmtTJbkLfSOSvC0c6fW97XjhWFCW-Ppu9_RxbEHqrmtns13VYhcKkLoQGkFKgZklZqULzBxE5a0SuFaRjndmpOd_YRIyYpAA77Vrg0hb2U_iNaU9qX1FMpAYbVTsVSFnptJqyVm3inCmZuMEcCllJuct43Gb7sPlPFuDs2hFjaevUmjxI0CWDE59DHP62juBxGtQn3gqUU8uDF5ee-G46IDLvMsG32qyCrcRYfMW_F-Vfj25OeDrMhnPvsJObaxC_Z7uey1kcZlTlIxAe_JXIsGeNbbfgSUjdeABIyW29dERHd22aoSfuyPQK3680GnEAYf=w1112-h625-no)
+![Aplicativo](https://i.ibb.co/LtVsphd/Screenshot-2019-07-01-22-32-27-220-com-example-lucas-pi3.png)
 
 
 <p>
