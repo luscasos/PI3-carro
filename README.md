@@ -85,11 +85,11 @@ Com todos os requisitos de Hardware definidos foi desenvolvido o esquemático e 
 ![esquematico](https://i.ibb.co/CJ0CqbJ/esquematico-completo.png)
 ![Placa 3d](https://i.ibb.co/C7m8LZ0/Placa-3d.png)
 
-![carro visto de cima](https://lh3.googleusercontent.com/XHgXW_0hG--oXE6uksJy7TSglDY0m_3GjwJ7JpxUj3nDGJl_j5kw8t41qFqI3KVQebgnOixmsnlhJWuOOmGEBwOP9TRfeRpaNYIoX5CaxXfUMoYwmZtibPrEwG1qelVRuH2Ht5bJxe4XIjcndk-vlNCzfa9I7wqE4hAHR1dnG9Mfc3DZOrcGQJZJ0kBpwk9WV5Z9XiZtq6caUjpY_Q7VtCFR3JaJ_YBxzC-LkU3g2XBaja3BT3_fmBItKwr26wGlN6lZX_U7AkY6bs6LvmjEq5iOWTZNz4afp40fs5y9rJixaFzpfDbfBVEDrs0u2O9NK0jaZ4a9uIYgn0f3tjlfhU8jnNGRl1VR19TjuiiqR0hocCxPJ9riAJDEJIjA1NgjUYk4Xx2mlM_v-yGQa8YbQL12lg2yes7WE5hrMUiF4CzDNctjAm7OMXmLvNUfbgQy8PAeBzc5-pytBM97ovhWTkDPTlwB7liflztpgzAt_ofb0G7sJkzYhrtdks1Wjh2jRRSgqJkcDEL9xNpR5TW52FUpuHmS73J9A8qpl3OOT7A1xmlFHrEYquWsuQV0Y9VU__CJYoH0DgZiMnmrZ7rgj7_4ZiPkOW8a8d2uS4X-kfckcw_2nx95IqOZOPg0rupB53jOHk49uN-mZHuJSVyK8SPyz_P_3JVU=w469-h625-no)
+![carro visto de cima](https://i.ibb.co/3WgfKwv/IMG-20190626-154856.jpg)
 
 A placa de circuito impresso foi projetada para que o circuito de comunicação bluetooth ficasse longe do principal foco do ruído do circuito, que são os motores, contudo ainda foi deixado o uC ao lado dos motores e das pontes H, uma implementação mais correta seria distanciar esses dois componentes geradores de ruído, juntamente com o regulador de tensão. e acoplar o sensor de velocidade de outra maneira, que não por cabos longos como foi projetado, essas e outras correções foram feitas em outra placa a ser utilizada em disciplinas ligadas a programação de microcontroladores.
 
-O carro também foi objeto de estudo por uma dupla de colegas dentro da disciplina de compatibilidade eletromagnética, estando todos dados disponíveis no link https://github.com/lsmanoel/CEM_
+O carro também foi objeto de estudo por uma dupla de colegas dentro da disciplina de compatibilidade eletromagnética, estando todos dados disponíveis no link https://github.com/lsmanoel/CEM_3
 
 # Software do microcontrolador
 
